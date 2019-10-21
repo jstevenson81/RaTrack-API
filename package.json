@@ -1,5 +1,5 @@
 {
-  "name": "RaTrack-API",
+  "name": "ratrack-api",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -9,15 +9,25 @@
     "start:host": "func start",
     "start": "npm run start:host & npm run watch",
     "build:production": "npm run prestart && npm prune --production",
-    "test": "echo \"No tests yet...\""
+    "test": "npm run build & jest"
   },
   "dependencies": {
+    "@azure/cosmos": "^3.3.6",
     "express-jwt": "^5.3.1",
     "express-jwt-authz": "^2.3.1",
-    "jwks-rsa": "^1.6.0"
+    "jwks-rsa": "^1.6.0",
+    "lodash": "^4.17.15"
   },
   "devDependencies": {
     "@azure/functions": "^1.0.2-beta2",
-    "typescript": "^3.3.3"
+    "@types/documentdb": "^1.10.5",
+    "@types/jest": "^24.0.19",
+    "@types/lodash": "^4.14.144",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.6.4"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
