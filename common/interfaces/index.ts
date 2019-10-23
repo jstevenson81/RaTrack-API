@@ -1,5 +1,3 @@
-import { ICosmosDbConfig, IError } from './index';
-import { SqlQuerySpec } from 'documentdb';
 import { SqlParameter } from '@azure/cosmos';
 
 //#region Common Interfaces
@@ -78,6 +76,13 @@ export interface ICosmosClient<T extends IDocument> {
   addUpdateAsync(document: T): Promise<T>;
 
   /**
+   * This method creates the create date and create time properties on an item
+   * @param {T} document This is the document you want to add a create date and create time.
+   * @returns {T} Returns the newly populated document
+   */
+  paritionDocument(document: T): T;
+
+  /**
    * Removes a document
    * @param  {T} document
    * @returns {Promise<void>}  Returns an empty promise.
@@ -106,5 +111,16 @@ export interface IAuth0Options {
  */
 export interface IDocument {
   id: string;
+  createDate?: string;
+  createTime?: string;
+  updateTime?: string;
+}
+
+export interface IUser extends IDocument {
+  userName: string;
+  firstName: string;
+  lastName: string;
+  age: string;
+  gender: string;
 }
 //#endregion

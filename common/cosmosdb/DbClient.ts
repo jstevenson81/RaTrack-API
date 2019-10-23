@@ -2,6 +2,7 @@
 import { Container, CosmosClient, FeedResponse } from '@azure/cosmos';
 import { SqlParameter, SqlQuerySpec } from 'documentdb';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 
 import { ICosmosClient, ICosmosContainer, ICosmosDbConfig, IDocument } from '../interfaces';
 import cosmosDbConfig from './config';
@@ -13,7 +14,9 @@ import cosmosDbConfig from './config';
  * list of available containers from the config
  * @property {CosmosClient} client This is the actual CosmosDb Azure client object.
  * @property {ICosmosDbConfig} config This is the database config derived from the cosmosDbConfig import
- *
+ *import { moment } from 'moment';
+import { moment } from 'moment';
+
  */
 class DbClient<T extends IDocument> implements ICosmosClient<T> {
   //#region members properties
@@ -37,7 +40,7 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
     // we didn't find the container, so we need to throw
     if (_.isUndefined(foundContainer))
       throw new Error(
-        `The container passed: ${container} to the constructor was not found in the config.`
+        `The container passed (${container}) was not found in the config. Please add it to the config file if it exists.`
       );
 
     // create the client
@@ -86,12 +89,26 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
   //#endregion
 
   //#region CREATE UPDATE DELETE
-  addUpdateAsync(document: T): Promise<T> {
-    throw new Error('Method not implemented.');
-  }
-  removeAsync(document: T): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
+  addUpdateAsync = async (document: T): Promise<T> => {
+    document = this.paritionDocument(document);
+    await this.container.items.upsert(document);
+    return document;
+  };
+
+  removeAsync = async (document: T): Promise<void> => {
+    const foundDoc = this.container.item(document.id, document.createDate);
+    await foundDoc.delete();
+  };
+
+  paritionDocument = (document: T): T => {
+    const mom = moment();
+    if (_.isUndefined(document.createTime) || _.isNull(document.createTime)) {
+      document.createDate = mom.format('YYYY-MM-DD');
+      document.createTime = mom.format('HH:mm:ss');
+    }
+    document.updateTime = mom.toJSON();
+    return document;
+  };
   //#endregion
 
   //#region private methods
@@ -124,7 +141,6 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
     var list: Array<T> = this.mapFeedToList(feed);
     return _.find(list, predicate);
   };
-
   //#endregion
 }
 

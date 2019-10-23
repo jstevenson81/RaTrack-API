@@ -9,14 +9,15 @@
     "start:host": "func start",
     "start": "npm run start:host & npm run watch",
     "build:production": "npm run prestart && npm prune --production",
-    "test": "npm run build & jest"
+    "test": "npm run-script build & jest"
   },
   "dependencies": {
     "@azure/cosmos": "^3.3.6",
     "express-jwt": "^5.3.1",
     "express-jwt-authz": "^2.3.1",
     "jwks-rsa": "^1.6.0",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
     "@azure/functions": "^1.0.2-beta2",
