@@ -1,4 +1,5 @@
-import { SqlParameter } from '@azure/cosmos';
+import { FeedResponse } from '@azure/cosmos';
+import { SqlQuerySpec } from 'documentdb';
 
 //#region Common Interfaces
 /**
@@ -62,11 +63,18 @@ export interface ICosmosClient<T extends IDocument> {
 
   /**
    * Gets an array of items based on the SQL statement passed
-   * @param  {string} sql This is the SQL you want to execute against the document DB.
-   * @param {Array<SqlParameter>} paramList this is the list of the parameters.
+   * @param {SqlQuerySpec} sqlQuerySpec This is the query + params.
    * @returns {Promise<Array<IDocument>>} A promise of items of type T.  T inherits from IDocument.
    */
-  queryAsync(sql: string, paramList: SqlParameter[]): Promise<Array<T>>;
+  queryAsync(sqlQuerySpec: SqlQuerySpec, predicate?: (item: T) => boolean): Promise<Array<T>>;
+
+  /**
+   * Gets one item from a feed based on a predicate method
+   * @param {FeedResponse<any>} feed This is the feed from the document db query that contains the items
+   * @param {Function} predicate This is the method that will be run across each item as we try to find the item in the feed.
+   * @returns {T} The item or if not found, undefined.
+   */
+  filterItems(feed: FeedResponse<any>, predicate: (item: T) => boolean): Array<T>;
 
   /**
    * Adds or updates a document.
@@ -113,7 +121,7 @@ export interface IDocument {
   id: string;
   createDate?: string;
   createTime?: string;
-  updateTime?: string;
+  updateTime?: Date;
 }
 
 export interface IUser extends IDocument {
@@ -122,5 +130,6 @@ export interface IUser extends IDocument {
   lastName: string;
   age: string;
   gender: string;
+  mobilePhone: string;
 }
 //#endregion

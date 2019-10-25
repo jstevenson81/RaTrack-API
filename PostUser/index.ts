@@ -1,5 +1,5 @@
 import { HttpRequest } from '@azure/functions';
-import * as _ from 'lodash';
+import _ = require('lodash');
 import { Context } from 'vm';
 
 import auth from '../common/auth';
@@ -10,14 +10,23 @@ import { GetByUserName } from '../common/cosmosdb/queries';
 import { IResponse, IUser } from '../common/interfaces';
 
 // create the main operation
-const operation = async (userName: string): Promise<IResponse> => {
+const operation = async (user: IUser): Promise<IResponse> => {
   // setup the Dbclient
   const db = new DbClient<IUser>('users');
+  // first we need to see if a user exists
+  var eUsers = await db.queryAsync(
+    GetByUserName(user.userName),
+    FilterByUserName(user.userName)
+  );
+  if (_.isEmpty(eUsers) === false) {
+    return {
+      status: 200,
+      body: { message: `User with the user name ${user.userName} already exists.`, user: eUsers[0] }
+    };
+  }
   // query the database for the user
-  const users = await db.queryAsync(GetByUserName(userName), FilterByUserName(userName));
-  return _.isEmpty(users)
-    ? { status: 404, body: `The user with the name ${userName} was not found.` }
-    : { status: 200, body: users[0] };
+  var newUser = await db.addUpdateAsync(user);
+  return { status: 200, body: newUser };
 };
 
 // get a reference to the auth module
@@ -25,7 +34,7 @@ const auth0 = auth(auth0Options);
 // main trigger
 const httpTrigger = auth0(
   async (context: Context, req: HttpRequest): Promise<void> => {
-    context.res = await operation(req.params.userName);
+    context.res = await operation(req.body);
     context.done();
   }
 );

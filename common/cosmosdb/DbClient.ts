@@ -1,22 +1,18 @@
-// component imports
 import { Container, CosmosClient, FeedResponse } from '@azure/cosmos';
-import { SqlParameter, SqlQuerySpec } from 'documentdb';
+import { SqlQuerySpec } from 'documentdb';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
 import { ICosmosClient, ICosmosContainer, ICosmosDbConfig, IDocument } from '../interfaces';
 import cosmosDbConfig from './config';
+import { GetAll } from './queries';
 
-// app imports
 /** This class allows a user to query a document database.  It is generic.  The type
  *  returned implements the IDocument interface which should have an id property.
  * @property {string} container This is the container for this instance of the database client. It is found in the constructor based on the
  * list of available containers from the config
  * @property {CosmosClient} client This is the actual CosmosDb Azure client object.
  * @property {ICosmosDbConfig} config This is the database config derived from the cosmosDbConfig import
- *import { moment } from 'moment';
-import { moment } from 'moment';
-
  */
 class DbClient<T extends IDocument> implements ICosmosClient<T> {
   //#region members properties
@@ -63,28 +59,34 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
     // run a query against the document db
     // get the feed and return the item or undefined
     var feed = await this.getFeedAsync(querySpec);
-    return this.getOneItem(feed, (item: T) => {
-      return item.id === id;
+    const items = this.filterItems(feed, (i: T): boolean => {
+      return i.id === id;
     });
+    return _.isEmpty(items) ? undefined : items[0];
   };
 
   getAllAsync = async (): Promise<T[]> => {
-    // run the query to get all items
-    const spec: SqlQuerySpec = {
-      query: 'select * from root',
-      parameters: []
-    };
     // get the feed
-    var feed = await this.getFeedAsync(spec);
+    var feed = await this.getFeedAsync(GetAll());
     // map the feed to an array
     return this.mapFeedToList(feed);
   };
 
-  queryAsync = async (sql: string, paramList: Array<SqlParameter>): Promise<Array<T>> => {
-    if (_.isEmpty(sql)) throw new Error('The parameter sql cannot be empty');
-    const querySpec: SqlQuerySpec = { query: sql, parameters: paramList };
-    const feed = await this.getFeedAsync(querySpec);
-    return this.mapFeedToList(feed);
+  queryAsync = async (
+    sqlQuerySpec: SqlQuerySpec,
+    predicate?: (item: T) => boolean
+  ): Promise<Array<T>> => {
+    // do we have a blank query spec?
+    if (!sqlQuerySpec) throw new Error('The parameter sqlQuerySpec cannot be empty');
+    // get the feed from the database
+    const feed = await this.getFeedAsync(sqlQuerySpec);
+    // if we are filtering, filter, otherwise map to an array
+    return predicate ? this.filterItems(feed, predicate) : this.mapFeedToList(feed);
+  };
+
+  filterItems = (feed: FeedResponse<any>, predicate: (item: T) => boolean): Array<T> => {
+    var list: Array<T> = this.mapFeedToList(feed);
+    return _.filter(list, predicate);
   };
   //#endregion
 
@@ -106,9 +108,10 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
       document.createDate = mom.format('YYYY-MM-DD');
       document.createTime = mom.format('HH:mm:ss');
     }
-    document.updateTime = mom.toJSON();
+    document.updateTime = mom.toDate();
     return document;
   };
+
   //#endregion
 
   //#region private methods
@@ -131,16 +134,6 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
     return _.map(results, _.clone);
   };
 
-  /**
-   * Gets one item from a feed based on a predicate method
-   * @param {FeedResponse<any>} feed This is the feed from the document db query that contains the items
-   * @param {Function} predicate This is the method that will be run across each item as we try to find the item in the feed.
-   * @returns {T} The item or if not found, undefined.
-   */
-  private getOneItem = (feed: FeedResponse<any>, predicate: (item: T) => boolean): T => {
-    var list: Array<T> = this.mapFeedToList(feed);
-    return _.find(list, predicate);
-  };
   //#endregion
 }
 
