@@ -1,6 +1,6 @@
-import DbClient from '../common/cosmosdb/DbClient';
-import { FilterByUserName } from '../common/cosmosdb/predicates';
-import { GetAll, GetByUserName } from '../common/cosmosdb/queries';
+import DbClient from '../common/db/DbClient';
+import { FilterByUserName } from '../common/db/predicates';
+import { GetAll, GetByUserName } from '../common/db/queries';
 import { IUser } from '../common/interfaces';
 
 const createUser = async (client: DbClient<IUser>): Promise<IUser> => {

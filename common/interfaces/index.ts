@@ -112,7 +112,7 @@ export interface IAuth0Options {
   algorithm: string;
 }
 //#endregion
-//# region Database Interfaces
+//#region Database Interfaces
 /**
  * Defines what a base document should look like.  All documents have an id property.
  * @property {string} id This the identifier of the document.  Usually a GUID.
@@ -131,5 +131,52 @@ export interface IUser extends IDocument {
   age: string;
   gender: string;
   mobilePhone: string;
+}
+//#endregion
+//#region Business Interfaces
+/**
+ * This interface defines business logic for a user account
+ */
+export interface IUserBusLogic {
+  /**
+   * This methods gets a user based on their user name
+   * @param {string} userName The user's user name we're using the file them
+   */
+  getUserAsync(userName: string): Promise<IUser>;
+  /**
+   * Updates/Adds a new user
+   * @param {IUser} user This is the user we are trying to update/add
+   */
+  upsertUserAsync(user: IUser): Promise<IUser>;
+}
+/**
+ * This interface defines a validation response
+ * @property {string} field This is the field we're validating
+ * @property {Array<string>} messages These are the messages for this field
+ * @property {boolean} valid This tells you if the field is valid or not.
+ */
+export interface IValidationResponse {
+  field: string;
+  messages: Array<string>;
+  valid: boolean;
+}
+/**
+ * This defines a validator for a field
+ * @property {string} field the field we're validating
+ * @property {Array<IValidator>} validators These are the validators we run on a field
+ */
+export interface IFieldValidation {
+  field: string;
+  validators: Array<IValidator>;
+}
+/**
+ * This defines a validator for a field
+ * @property {number} order this is the order in which the validator should be run
+ * @property {string} customMessage this is the message that should be returned from a validator
+ */
+export interface IValidator {
+  order: number;
+  customMessage: string;
+  validator: () => boolean;
 }
 //#endregion
