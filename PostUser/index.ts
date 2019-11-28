@@ -1,20 +1,21 @@
-// create the main operation
 import { HttpRequest } from '@azure/functions';
 import _ = require('lodash');
 import { Context } from 'vm';
 
 import auth from '../common/auth';
 import auth0Options from '../common/auth/auth0Options';
-import DbClient from '../common/db/DbClient';
-import { FilterByUserName } from '../common/db/predicates';
-import { GetByUserName } from '../common/db/queries';
+import DbClient from '../common/db/dbClient';
+import { getByUserName } from '../common/db/queries';
 import { IResponse, IUser } from '../common/interfaces';
 
+// create the main operation
 const operation = async (user: IUser): Promise<IResponse> => {
   // setup the Dbclient
   const db = new DbClient<IUser>('users');
   // first we need to see if a user exists
-  var eUsers = await db.queryAsync(GetByUserName(user.userName), FilterByUserName(user.userName));
+  var eUsers = await db.queryAsync(getByUserName(user.userName), (u: IUser) => {
+    return u.userName === user.userName;
+  });
   if (_.isEmpty(eUsers) === false) {
     return {
       status: 200,

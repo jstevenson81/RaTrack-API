@@ -1,6 +1,5 @@
-import DbClient from '../common/db/DbClient';
-import { FilterByUserName } from '../common/db/predicates';
-import { GetAll, GetByUserName } from '../common/db/queries';
+import DbClient from '../common/db/dbClient';
+import { getAll, getByUserName } from '../common/db/queries';
 import { IUser } from '../common/interfaces';
 
 const createUser = async (client: DbClient<IUser>): Promise<IUser> => {
@@ -11,7 +10,9 @@ const createUser = async (client: DbClient<IUser>): Promise<IUser> => {
     lastName: 'stevenson',
     age: '40',
     gender: 'M',
-    mobilePhone: '+15044300812'
+    mobilePhone: '+15044300812',
+    feelings: [],
+    activities: []
   };
   await client.addUpdateAsync(newUser);
   return newUser;
@@ -38,7 +39,9 @@ describe('Upsert/Remove tests', () => {
       lastName: 'stevenson',
       age: '40',
       gender: 'M',
-      mobilePhone: '+15044300812'
+      mobilePhone: '+15044300812',
+      feelings: [],
+      activities: []
     };
 
     // TEST
@@ -77,7 +80,9 @@ describe('Upsert/Remove tests', () => {
       lastName: 'stevenson',
       age: '40',
       gender: 'M',
-      mobilePhone: '+15044300812'
+      mobilePhone: '+15044300812',
+      feelings: [],
+      activities: []
     };
 
     const document = await client.addUpdateAsync(newUser);
@@ -134,7 +139,7 @@ describe('Read Tests', () => {
     const newUser = await createUser(client);
 
     // TEST
-    const result = await client.queryAsync(GetAll());
+    const result = await client.queryAsync(getAll());
     expect(result.length).toBeGreaterThan(0);
 
     // CELANUP
@@ -143,13 +148,15 @@ describe('Read Tests', () => {
 
   it('QueryAsync should return an empty collection of items when no items exist in database.', async () => {
     const client = new DbClient('users');
-    const result = await client.queryAsync(GetByUserName('blah'), FilterByUserName('blah'));
+    const result = await client.queryAsync(getByUserName('blah'), (u: IUser) => {
+      return u.userName === 'blah';
+    });
     expect(result.length).toBe(0);
   });
 
   it('QueryAsync should return a collection of items with params.', async () => {
     const client = new DbClient('users');
-    const result = await client.queryAsync(GetAll());
+    const result = await client.queryAsync(getAll());
     expect(result.length).toBeGreaterThan(0);
   });
 });

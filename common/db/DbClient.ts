@@ -5,7 +5,7 @@ import * as moment from 'moment';
 
 import { ICosmosClient, ICosmosContainer, ICosmosDbConfig, IDocument } from '../interfaces';
 import cosmosDbConfig from './config';
-import { GetAll } from './queries';
+import { getAll } from './queries';
 
 /** This class allows a user to query a document database.  It is generic.  The type
  *  returned implements the IDocument interface which should have an id property.
@@ -62,12 +62,12 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
     const items = this.filterItems(feed, (i: T): boolean => {
       return i.id === id;
     });
-    return _.isEmpty(items) ? undefined : items[0];
+    return _.isEmpty(items) ? undefined : _.head(items);
   };
 
   getAllAsync = async (): Promise<T[]> => {
     // get the feed
-    var feed = await this.getFeedAsync(GetAll());
+    var feed = await this.getFeedAsync(getAll());
     // map the feed to an array
     return this.mapFeedToList(feed);
   };
