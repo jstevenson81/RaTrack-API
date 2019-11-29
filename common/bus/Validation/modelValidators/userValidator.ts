@@ -1,6 +1,7 @@
+import * as _ from 'lodash';
+
 import { IModelValidator, IUser, IValidationResponse } from '../../../interfaces';
 import { inList, isNumber, minMax, required } from '../validators';
-import * as _ from './node_modules/lodash';
 
 /**
  * Validates a user model

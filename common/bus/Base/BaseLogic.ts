@@ -1,7 +1,7 @@
 import _ = require('lodash');
 
 import DbClient from '../../db/dbClient';
-import { IDocument } from '../../interfaces';
+import { IDocument, IValidationResponse } from '../../interfaces';
 import { IError } from '../../interfaces/http/IError';
 import { IResponse } from '../../interfaces/http/IResponse';
 
@@ -11,7 +11,7 @@ class BaseLogic<T extends IDocument> {
     this.db = new DbClient<T>(collection);
   }
 
-  head = (list: Array<T>): T => {
+  first = (list: Array<T>): T => {
     return _.head(list);
   };
 
@@ -19,6 +19,14 @@ class BaseLogic<T extends IDocument> {
   created = (data: any) => this.goodResponse(data, 201);
   notFound = (err: Error) => this.badResponse(err, 404);
   serverError = (err: Error) => this.badResponse(err);
+  validationError = (validationIssues: Array<IValidationResponse>) =>
+    this.badResponse(
+      new Error(
+        'There was an error validating your request.  See the data property for the specific issues'
+      ),
+      400,
+      validationIssues
+    );
 
   goodResponse = (data: any, status?: number): IResponse => {
     return {
@@ -26,12 +34,12 @@ class BaseLogic<T extends IDocument> {
       body: { data: data }
     };
   };
-  badResponse = (err: Error, status?: number): IResponse => {
+  badResponse = (err: Error, status?: number, data?: any): IResponse => {
     return {
       status: status | 500,
       body: {
         err: this.createError(err),
-        data: undefined
+        data: data
       }
     };
   };

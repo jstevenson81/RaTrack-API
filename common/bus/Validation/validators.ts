@@ -1,5 +1,6 @@
+import * as _ from 'lodash';
+
 import { IValidationResponse } from '../../interfaces';
-import * as _ from './node_modules/lodash';
 
 const createResponse = (valid: boolean, field: string, message: string) => {
   const response: IValidationResponse = { field: field, message: '', valid: true };
