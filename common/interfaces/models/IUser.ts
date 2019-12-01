@@ -1,4 +1,4 @@
-import { IActivity, IDocument, IFeeling } from '.';
+import { IActivity, IDocument, IFeeling } from '..';
 
 /**
  * The represents a user in the document db

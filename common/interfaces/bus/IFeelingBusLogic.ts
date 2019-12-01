@@ -1,5 +1,4 @@
-import { IResponse } from '../http';
-import { IFeeling } from '../models';
+import { IFeeling, IResponse } from '../';
 
 export interface IFeelingBusLogic {
   /**

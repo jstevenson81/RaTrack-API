@@ -1,9 +1,7 @@
 import _ = require('lodash');
 
 import DbClient from '../../db/dbClient';
-import { IDocument, IUser, IValidationResponse } from '../../interfaces';
-import { IError } from '../../interfaces/http/IError';
-import { IResponse } from '../../interfaces/http/IResponse';
+import { IDocument, IError, IResponse, IUser, IValidationResponse } from '../../interfaces';
 
 class BaseLogic<T extends IDocument> {
   db: DbClient<T>;

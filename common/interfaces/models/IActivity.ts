@@ -1,4 +1,4 @@
-import { IDocument, IFeeling } from '.';
+import { IDocument, IFeeling } from '..';
 
 /**
  * This describes an activity

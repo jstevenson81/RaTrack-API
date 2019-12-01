@@ -1,4 +1,4 @@
-import { IError } from '.';
+import { IError } from '..';
 
 export interface IResponseBody {
   data: any;

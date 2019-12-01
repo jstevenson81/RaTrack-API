@@ -1,4 +1,4 @@
-import { IResponseBody } from './IResponseBody';
+import { IResponseBody } from '..';
 
 export interface IResponse {
   status: number;
