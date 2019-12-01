@@ -10,19 +10,6 @@ class UserLogic extends BaseLogic<IUser> implements IUserBusLogic {
     super('users');
   }
 
-  predicates = {
-    byUserName: (userName: string): ((user: IUser) => boolean) => {
-      return (u: IUser) => {
-        return u.userName === userName;
-      };
-    },
-    byId: (id: string): ((user: IUser) => boolean) => {
-      return (u: IUser) => {
-        return u.id === id;
-      };
-    }
-  };
-
   //#region adds/updates
   addNewAsync = async (user: IUser): Promise<IResponse> => {
     try {

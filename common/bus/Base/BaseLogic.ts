@@ -1,7 +1,7 @@
 import _ = require('lodash');
 
 import DbClient from '../../db/dbClient';
-import { IDocument, IValidationResponse } from '../../interfaces';
+import { IDocument, IUser, IValidationResponse } from '../../interfaces';
 import { IError } from '../../interfaces/http/IError';
 import { IResponse } from '../../interfaces/http/IResponse';
 
@@ -10,6 +10,19 @@ class BaseLogic<T extends IDocument> {
   constructor(collection: string) {
     this.db = new DbClient<T>(collection);
   }
+
+  predicates = {
+    byUserName: (userName: string): ((user: IUser) => boolean) => {
+      return (u: IUser) => {
+        return u.userName === userName;
+      };
+    },
+    byId: (id: string): ((user: IUser) => boolean) => {
+      return (u: IUser) => {
+        return u.id === id;
+      };
+    }
+  };
 
   first = (list: Array<T>): T => {
     return _.head(list);

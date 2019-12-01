@@ -102,7 +102,9 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
     await foundDoc.delete();
   };
 
-  paritionDocument = (document: T): T => {
+  paritionDocument = <TDocumentToPartition extends IDocument>(
+    document: TDocumentToPartition
+  ): TDocumentToPartition => {
     const mom = moment();
     if (_.isUndefined(document.createTime) || _.isNull(document.createTime)) {
       document.createDate = mom.format('YYYY-MM-DD');
