@@ -4,8 +4,8 @@
  */
 export interface IDocument {
   id: string;
-  createDate?: string;
-  createTime?: string;
-  updateTime?: Date;
+  guid: string;
+  docType: string;
+  createTime: Date;
+  updateTime: Date;
 }
-

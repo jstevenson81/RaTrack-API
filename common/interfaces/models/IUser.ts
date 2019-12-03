@@ -1,4 +1,4 @@
-import { IActivity, IDocument, IFeeling } from '..';
+import { IDocument } from '..';
 
 /**
  * The represents a user in the document db
@@ -10,6 +10,4 @@ export interface IUser extends IDocument {
   age: string;
   gender: string;
   mobilePhone: string;
-  feelings: Array<IFeeling>;
-  activities: Array<IActivity>;
 }

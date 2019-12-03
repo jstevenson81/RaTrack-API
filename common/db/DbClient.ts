@@ -1,10 +1,10 @@
 import { Container, CosmosClient, FeedResponse } from '@azure/cosmos';
 import { SqlQuerySpec } from 'documentdb';
 import * as _ from 'lodash';
-import * as moment from 'moment';
 
 import { ICosmosClient, ICosmosContainer, ICosmosDbConfig, IDocument } from '../interfaces';
 import cosmosDbConfig from './config';
+import { modelFactory } from './modelFactory';
 import { getAll } from './queries';
 
 /** This class allows a user to query a document database.  It is generic.  The type
@@ -50,11 +50,14 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
   //#endregion
 
   //#region READ
-  getOneAsync = async (id: string): Promise<T> => {
+  getOneAsync = async (id: string, docType: string): Promise<T> => {
     // create the query spec
     const querySpec: SqlQuerySpec = {
-      query: 'select * from root r where r.id = @id',
-      parameters: [{ name: '@id', value: id }]
+      query: 'select * from root r where r.id = @id and r.docType = @docType',
+      parameters: [
+        { name: '@id', value: id },
+        { name: '@docType', value: docType }
+      ]
     };
     // run a query against the document db
     // get the feed and return the item or undefined
@@ -65,9 +68,10 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
     return _.isEmpty(items) ? undefined : _.head(items);
   };
 
-  getAllAsync = async (): Promise<T[]> => {
+  getAllAsync = async (docType: string): Promise<T[]> => {
+    modelFactory().validateDocType(docType);
     // get the feed
-    var feed = await this.getFeedAsync(getAll());
+    var feed = await this.getFeedAsync(getAll(docType));
     // map the feed to an array
     return this.mapFeedToList(feed);
   };
@@ -92,28 +96,15 @@ class DbClient<T extends IDocument> implements ICosmosClient<T> {
 
   //#region CREATE UPDATE DELETE
   addUpdateAsync = async (document: T): Promise<T> => {
-    document = this.paritionDocument(document);
-    await this.container.items.upsert(document);
-    return document;
+    let newDocument: T = Object.assign({}, modelFactory().update(document));
+    await this.container.items.upsert(newDocument);
+    return newDocument;
   };
 
   removeAsync = async (document: T): Promise<void> => {
-    const foundDoc = this.container.item(document.id, document.createDate);
+    const foundDoc = this.container.item(document.id, document.guid);
     await foundDoc.delete();
   };
-
-  paritionDocument = <TDocumentToPartition extends IDocument>(
-    document: TDocumentToPartition
-  ): TDocumentToPartition => {
-    const mom = moment();
-    if (_.isUndefined(document.createTime) || _.isNull(document.createTime)) {
-      document.createDate = mom.format('YYYY-MM-DD');
-      document.createTime = mom.format('HH:mm:ss');
-    }
-    document.updateTime = mom.toDate();
-    return document;
-  };
-
   //#endregion
 
   //#region private methods
