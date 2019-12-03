@@ -10,15 +10,37 @@ class FeelingLogic extends BaseLogic<IUser> implements IFeelingBusLogic {
     super('users');
   }
 
+  //#region priaate methods
+  private findUserByNameAsync = async (userName: string): IUser => {
+    const users = await this.db.queryAsync(
+      getByUserName(userName),
+      this.predicates.byUserName(userName)
+    );
+    if (_.isEmpty(users) || _.isUndefined(users))
+      throw new Error(`A user with the user name ${userName} was not found.`);
+    return this.first(users);
+  };
+  //#endregion
+
+  deleteFeelingAsync = async (feeling: IFeeling, userName: string): Promise<IResponse> => {
+
+    let user: IUser;
+
+    try {
+      user = await this.findUserByNameAsync(userName);
+    } catch (e) {
+      return this.notFound(e);
+    }
+    try {
+      
+    } catch (e) {}
+  };
+
   addFeelingAsync = async (feeling: IFeeling, userName: string): Promise<IResponse> => {
     let user: IUser;
     let users: Array<IUser>;
     try {
-      users = await this.db.queryAsync(
-        getByUserName(userName),
-        this.predicates.byUserName(userName)
-      );
-      if (_.isEmpty(users)) throw new Error(`A user with the user name ${userName} was not found.`);
+      user = await this.findUserByNameAsync(userName);
     } catch (e) {
       return this.notFound(e);
     }

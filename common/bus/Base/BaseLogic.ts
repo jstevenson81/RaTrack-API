@@ -26,6 +26,7 @@ class BaseLogic<T extends IDocument> {
     return _.head(list);
   };
 
+  //#region responses
   ok = (data: any) => this.goodResponse(data);
   created = (data: any) => this.goodResponse(data, 201);
   notFound = (err: Error) => this.badResponse(err, 404);
@@ -38,7 +39,8 @@ class BaseLogic<T extends IDocument> {
       400,
       validationIssues
     );
-
+  //#endregion
+  //#region response creators
   goodResponse = (data: any, status?: number): IResponse => {
     return {
       status: status | 200,
@@ -54,6 +56,8 @@ class BaseLogic<T extends IDocument> {
       }
     };
   };
+  //#endregion
+  //#region errors
   createError = (err: Error, inners?: Array<Error>): IError => {
     const created: IError = {
       message: err.message,
@@ -68,6 +72,7 @@ class BaseLogic<T extends IDocument> {
 
     return created;
   };
+  //#endregion
 }
 
 export default BaseLogic;
